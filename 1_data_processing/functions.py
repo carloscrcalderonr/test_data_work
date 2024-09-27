@@ -134,19 +134,21 @@ def save_deleted_data(df):
     except Exception as e:
         logging.error(f'Error al guardar datos eliminados: {e}')
 
-
 def generate_csv_with_aggregations(input_csv, output_csv):
     """Genera un archivo CSV con estadísticas a partir de los datos procesados."""
     try:
-        aggregated_data = pd.DataFrame()
         logging.info(f'Comenzando a generar estadísticas a partir del archivo: {input_csv}')
+
+        aggregated_data = []
 
         for chunk in read_file(input_csv):
             validated_chunk = validate_data(chunk)
             normalized_chunk = normalize_data(validated_chunk)
             final_chunk = delete_duplicates(normalized_chunk)
 
-            aggregated_data = pd.concat([aggregated_data, final_chunk], ignore_index=True)
+            aggregated_data.append(final_chunk)
+
+        aggregated_data = pd.concat(aggregated_data, ignore_index=True)
 
         aggregated_data['ID'] = aggregated_data['ID'].astype('Int64')  # Asegurarse de que ID sea de tipo entero
         aggregated_data.to_csv('data_clean.csv', index=False)
